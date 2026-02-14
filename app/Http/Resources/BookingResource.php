@@ -20,6 +20,8 @@ class BookingResource extends JsonResource
             'check_in' => $this->check_in_date,
             'check_out' => $this->check_out_date,
             'status' => $this->status,
+            'notes' => $this->notes,
+            'reason' => $this->when($this->status === 'cancelled', $this->reason),
             'total_amount' => (float)$this->total_amount,
             'payment' => new PaymentResource($this->whenLoaded('payment'))
         ];
