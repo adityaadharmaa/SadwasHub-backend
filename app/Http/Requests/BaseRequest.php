@@ -18,6 +18,13 @@ class BaseRequest extends FormRequest
         return true;
     }
 
+    public function failedAuthorization()
+    {
+        throw new HttpResponseException(
+            $this->errorResponse("This action is unauthorized.", 403)
+        );
+    }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
@@ -27,6 +34,11 @@ class BaseRequest extends FormRequest
                 $validator->errors()
             )
         );
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge($this->route()->parameters());
     }
 
     /**

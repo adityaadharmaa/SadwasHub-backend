@@ -15,35 +15,30 @@ class RoleAndPermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Permission List
         $permissions = [
-            // Management Kamar
             'manage-rooms',
             'view-rooms',
-
-            // Management Booking
             'create-booking',
             'manage-all-bookings',
             'view-own-booking',
-
-            // Management User & Profil
             'verify-ktp',
             'manage-users',
             'edit-profile',
-
-            // Management Keuangan
             'manage-payments',
             'view-own-payments',
-
-            // Settings
             'manage-settings',
         ];
 
         foreach ($permissions as $permission) {
+            // Karena pakai App\Models\Permission (yang punya HasUuids), ID akan otomatis terisi
             Permission::create(['name' => $permission, 'guard_name' => 'api']);
         }
 
+        // Create Roles
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'api']);
         $adminRole->givePermissionTo(Permission::all());
 

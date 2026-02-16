@@ -19,8 +19,8 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'roles' => $this->getRoleNames()->first(),
             'profile' => new UserProfileResource($this->whenLoaded('profile')),
-            'creted_at_human' => $this->cerated_at->diffForHumans(),
-            'creted_at' => $this->cerated_at->toDateTimeString(),
+            'creted_at_human' => $this->created_at->diffForHumans(),
+            'creted_at' => $this->created_at->toDateTimeString(),
         ];
     }
 }

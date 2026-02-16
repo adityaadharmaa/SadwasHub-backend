@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
 
-class ApiResponseTrait
+trait ApiResponseTrait
 {
     /**
      * Success Response
