@@ -60,6 +60,11 @@ class BaseRepository
         return $model->update($payload);
     }
 
+    public function updateOrCreate(array $search, array $payload): ?Model
+    {
+        return $this->model->updateOrCreate($search, $payload);
+    }
+
     public function delete(string $id): bool
     {
         $model = $this->find($id);

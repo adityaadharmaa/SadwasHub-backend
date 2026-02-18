@@ -34,6 +34,11 @@ interface EloquentRepositoryInterface
     public function create(array $payload): ?Model;
 
     /**
+     * Update data jika sudah ada, atau buat baru jika tidak ada
+     */
+    public function updateOrCreate(array $search, array $payload): ?Model;
+
+    /**
      * Update data berdasarkan ID
      */
     public function update(string $id, array $payload): bool;
