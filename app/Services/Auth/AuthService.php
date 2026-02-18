@@ -7,6 +7,7 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Services\BaseService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Socialite;
@@ -137,5 +138,67 @@ class AuthService extends BaseService
                 'token' => $token
             ];
         });
+    }
+
+    /**
+     * Logic Mengirim Ulang link verifikasi email
+     */
+    public function resendEmailVerification($user)
+    {
+        if ($user->hasVerifiedEmail()) {
+            return [
+                'status' => 'already_verified',
+                'message' => 'Email sudah terverifikasi.'
+            ];
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return [
+            'status' => 'verification_sent',
+            'message' => 'Link verifikasi baru telah dikirim ke email Anda.'
+        ];
+    }
+
+
+    /**
+     * Logic Lupa Password
+     */
+    public function forgotPassword(array $data)
+    {
+        $status = Password::broker()->sendResetLink($data);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)]
+            ]);
+        }
+
+        return $status;
+    }
+
+    /**
+     * Logic Reset Password
+     */
+    public function resetPassword(array $data)
+    {
+        $status = Password::broker()->reset(
+            $data,
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)]
+            ]);
+        }
+
+        return $status;
     }
 }

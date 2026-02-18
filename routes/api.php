@@ -15,12 +15,16 @@ Route::prefix('v1')->group(function () {
         Route::get('/{provider}/callback', [AuthController::class, 'handleProviderCallback']);
 
         Route::middleware(['auth:sanctum'])->group(function () {
-            // Route::post('/email/verification-notification', [AuthController::class, 'resendEmailVerification']);
-            // Route::post('/logout', [AuthController::class, 'logout']);
+            Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail']);
+            Route::post('/logout', [AuthController::class, 'logout']);
         });
 
-        // Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-        // Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+        Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+            ->middleware(['signed'])
+            ->name('verification.verify');
+
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     });
     // ---- End Auth SPACE ----
 
@@ -61,6 +65,6 @@ Route::prefix('v1')->group(function () {
     // ------ End General Profile Space ------
 });
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+Route::get('/reset-password/{token}', function (string $token) {
+    return response()->json(['message' => 'Silakan gunakan token ini di frontend React Anda.', 'token' => $token]);
+})->name('password.reset');
