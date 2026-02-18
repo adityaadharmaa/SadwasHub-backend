@@ -14,6 +14,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/{provider}/callback', [AuthController::class, 'handleProviderCallback']);
     });
 
+    Route::prefix('admin')->group(function () {
+        Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+            Route::post('/verify-profile/{profileId}', [ProfileController::class, 'verify']);
+        });
+    });
+
     Route::prefix('profile')->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/me', [ProfileController::class, 'me']);

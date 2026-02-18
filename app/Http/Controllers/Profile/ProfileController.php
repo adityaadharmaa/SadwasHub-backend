@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Requests\Profile\VerifyProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\UserProfile;
 use App\Services\Profile\ProfileService;
@@ -36,6 +37,17 @@ class ProfileController extends Controller
         return $this->successResponse(
             new UserResource($update),
             'Data profile berhasil diupdate'
+        );
+    }
+
+    public function verify(VerifyProfileRequest $request, $profileId)
+    {
+        $this->profileService->verifyProfile($profileId, $request->validated());
+
+        $status = $request->is_verified ? 'disetujui' : 'ditolak';
+        return $this->successResponse(
+            null,
+            "Profile berhasil diverifikasi dan $status."
         );
     }
 

@@ -53,4 +53,14 @@ class ProfileService extends BaseService
             return $user;
         });
     }
+
+    public function verifyProfile($profileId, array $data)
+    {
+        return $this->atomic(function () use ($profileId, $data) {
+            return $this->profileRepo->update($profileId, [
+                'is_verified' => $data['is_verified'],
+                'admin_note' => $data['admin_note'] ?? null,
+            ]);
+        });
+    }
 }
