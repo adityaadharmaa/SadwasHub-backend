@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Repositories\Interfaces\ProfileRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Services\BaseService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -32,7 +33,8 @@ class AuthService extends BaseService
         return $this->atomic(function () use ($data) {
             $user = $this->userRepo->create([
                 'email' => $data['email'],
-                'password' => Hash::make($data['password'])
+                'password' => Hash::make($data['password']),
+                'email_verified_at' => null
             ]);
 
             $user->assignRole('tenant');
@@ -45,6 +47,8 @@ class AuthService extends BaseService
                 'ktp_path' => '-',
                 'is_verified' => false
             ]);
+
+            event(new Registered($user));
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -69,7 +73,11 @@ class AuthService extends BaseService
             ]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $expiration = isset($data['remember_me']) && $data['remember_me']
+            ? now()->addDays(30)
+            : now()->addDay();
+
+        $token = $user->createToken('auth_token', ['*'], $expiration)->plainTextToken;
 
         return [
             'user' => $user,
