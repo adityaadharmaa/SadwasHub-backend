@@ -28,9 +28,10 @@ class UserProfileResource extends JsonResource
                 'name' => $this->emergency_contact_name,
                 'phone' => $this->emergency_contact_phone,
             ],
-            'ktp_url' => $this->ktp_path ? url("/api/v1/profile/ktp/" . basename($this->ktp_path)) : null,
+            'ktp_url' => $this->getKtpUrl($this->ktp_path),
 
             'is_verified' => (bool) $this->is_verified,
+            'admin_note' => $this->admin_note,
         ];
     }
 

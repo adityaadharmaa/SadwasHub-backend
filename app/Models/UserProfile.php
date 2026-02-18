@@ -23,6 +23,7 @@ class UserProfile extends Model
         'emergency_contact_phone',
         'ktp_path',
         'is_verified',
+        'admin_note',
     ];
 
     protected $casts = [

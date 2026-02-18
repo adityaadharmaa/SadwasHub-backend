@@ -14,7 +14,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $profile = $this->profile;
+        $profile = $this->relationLoaded('profile') ? $this->profile : null;
         return [
             'id' => $this->id,
             'email' => $this->email,
