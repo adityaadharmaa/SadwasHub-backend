@@ -24,7 +24,7 @@ class TicketResource extends JsonResource
             'admin_note' => $this->admin_note,
             'room' => new RoomResource($this->whenLoaded('room')),
             'user' => new UserResource($this->whenLoaded('user')),
-            'created_at_humans' => $this->created_at->diffToHummans(),
+            'created_at_humans' => $this->created_at->diffForHumans(),
             'created_at' => $this->created_at->toIso8601String()
         ];
     }
