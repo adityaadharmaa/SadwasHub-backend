@@ -76,6 +76,7 @@ Route::prefix('v1')->group(function () {
                     return response()->json(['message' => 'This is exclusive content for verified tenants!']);
                 });
                 Route::post('/bookings', [BookingController::class, 'store']);
+                Route::post('/bookings/{id}/extend', [BookingController::class, 'extend']);
                 Route::get('/bookings', [BookingController::class, 'myBookings']);
 
                 Route::get('/tickets', [TicketController::class, 'myTickets']);

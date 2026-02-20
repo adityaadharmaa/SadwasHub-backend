@@ -66,10 +66,18 @@ class XenditWebhookController extends Controller
                     if ($booking) {
                         $booking->update(['status' => 'cancelled']);
 
-                        // Lepas kunci kamar agar bisa disewa orang lain
-                        $room = Room::find($booking->room_id);
-                        if ($room) {
-                            $room->update(['status' => 'available']);
+                        $activeBookingsCount = Booking::where('room_id', $booking->room_id)
+                            ->where('status', 'confirmed')
+                            ->where('check_out_date', '>=', now())
+                            ->count();
+
+                        // Jika aktif booking nya tidak ada maka 
+                        if ($activeBookingsCount === 0) {
+                            // Lepas kunci kamar agar bisa disewa orang lain
+                            $room = Room::find($booking->room_id);
+                            if ($room) {
+                                $room->update(['status' => 'available']);
+                            }
                         }
                     }
                 }

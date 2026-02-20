@@ -11,7 +11,7 @@ class ExtendBookingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,7 @@ class ExtendBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'duration_months' => ['required', 'integer', 'min:1', 'max:12']
         ];
     }
 }
