@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Room;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdateRoomRequest extends FormRequest
+class UpdateRoomTypesRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +21,13 @@ class UpdateRoomRequest extends FormRequest
      */
     public function rules(): array
     {
-        $roomId = $this->route('room');
-
         return [
-            'room_type_id' => 'sometimes|uuid|exists:room_types,id',
-            // Pengecualian unique ID agar tidak error saat update tanpa ganti nomor kamar
-            'room_number' => 'sometimes|string|max:20|unique:rooms,room_number,' . $roomId,
-            'status' => 'sometimes|in:available,occupied,maintenance',
+            'name' => 'sometimes|string|max:50',
+            'description' => 'nullable|string',
+            'price_per_month' => 'sometimes|numeric|min:0',
+
+            'facilities' => 'array',
+            'facilities.*' => 'exists:facilities,id',
         ];
     }
 }

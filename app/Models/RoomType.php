@@ -24,6 +24,14 @@ class RoomType extends Model
 
     public function facilities(): BelongsToMany
     {
-        return $this->belongsToMany(Facilitie::class)->using(RoomTypeFacility::class)->withTimestamps();
+        return $this->belongsToMany(
+            Facilitie::class,
+            'room_type_facilities',
+            'room_type_id',
+            'facility_id'
+        )
+            ->using(RoomTypeFacility::class)
+            ->withPivot('id')
+            ->withTimestamps();
     }
 }

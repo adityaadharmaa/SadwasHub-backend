@@ -14,14 +14,16 @@ class Booking extends Model
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'use_id',
+        'user_id',
         'room_id',
+        'promo_id',
         'check_in_date',
         'check_out_date',
         'status',
         'reason',
         'notes',
         'total_amount',
+        'discount_amount'
     ];
 
     protected $casts = [
@@ -40,7 +42,7 @@ class Booking extends Model
         return $this->belongsTo(Room::class);
     }
 
-    public function payment(): HasOne
+    public function payments(): HasOne
     {
         return $this->hasOne(Payment::class);
     }
@@ -48,5 +50,10 @@ class Booking extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');
+    }
+
+    public function promo(): BelongsTo
+    {
+        return $this->belongsTo(Promo::class);
     }
 }

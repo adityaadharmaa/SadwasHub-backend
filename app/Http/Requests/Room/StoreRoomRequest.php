@@ -22,10 +22,10 @@ class StoreRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'room_type_id' => 'required|exists:room_types,id',
+            'room_type_id' => 'required|uuid|exists:room_types,id',
             // Nomor kamar harus unik agar tidak ada duplikasi
-            'room_number' => 'required|string|unique:rooms,room_number',
-            'status' => 'in:available,occupied,maintenance',
+            'room_number' => 'required|string|max:20|unique:rooms,room_number',
+            'status' => 'nullable|in:available,occupied,maintenance',
         ];
     }
 }

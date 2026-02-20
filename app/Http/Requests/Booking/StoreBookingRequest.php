@@ -22,27 +22,10 @@ class StoreBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'room_id' => [
-                'required',
-                'uuid',
-                'exists:rooms,id'
-            ],
-
-            // Tanggal Check-in minimal hari ini (tidak boleh mundur)
-            'check_in_date' => [
-                'required',
-                'date',
-                'after_or_equal:today'
-            ],
-
-            'notes' => ['nullable', 'text'],
-
-            // Tanggal Check-out WAJIB setelah Check-in
-            'check_out_date' => [
-                'required',
-                'date',
-                'after:check_in_date'
-            ],
+            'room_id' => 'required|uuid|exists:rooms,id',
+            'check_in_date' => 'required|date|after_or_equal:today',
+            'duration_months' => 'required|integer|min:1',
+            'promo_code' => 'nullable|string|exists:promos,code',
         ];
     }
 

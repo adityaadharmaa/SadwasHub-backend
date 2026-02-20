@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Booking\BookingController;
 use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Room\FacilityController;
+use App\Http\Controllers\Room\RoomController;
+use App\Http\Controllers\Room\RoomTypeController;
+use App\Http\Controllers\Webhook\XenditWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +38,22 @@ Route::prefix('v1')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
             Route::post('/verify-profile/{profileId}', [ProfileController::class, 'verify']);
+
+            // Room Type Management
+            Route::apiResource('/room-types', RoomTypeController::class);
+            // End Room Type Management
+
+            // Facility Management
+            Route::apiResource('/facilities', FacilityController::class);
+            // End Facility Management
+
+            // Room Management
+            Route::apiResource('/rooms', RoomController::class);
+            // End Room Management
+
+            // Booking Management
+            Route::get('/bookings', [BookingController::class, 'index']);
+            // End Booking Management
         });
     });
     // ------ End Admin Space ------
@@ -49,6 +70,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/exclusive-content', function () {
                     return response()->json(['message' => 'This is exclusive content for verified tenants!']);
                 });
+                Route::post('/bookings', [BookingController::class, 'store']);
+                Route::get('/bookings', [BookingController::class, 'myBookings']);
             });
         });
     });
@@ -63,6 +86,10 @@ Route::prefix('v1')->group(function () {
         });
     });
     // ------ End General Profile Space ------
+
+    // ------ Webhook SPACE ------
+    Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle']);
+    // ------ End Webhook Space ------
 });
 
 Route::get('/reset-password/{token}', function (string $token) {

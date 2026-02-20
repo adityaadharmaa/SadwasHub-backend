@@ -16,14 +16,16 @@ class BookingResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            // Opsional: Hanya muncul jika relasi user di-load (Biasanya untuk Admin)
+            'user' => new UserResource($this->whenLoaded('user')),
             'room' => new RoomResource($this->whenLoaded('room')),
-            'check_in' => $this->check_in_date,
-            'check_out' => $this->check_out_date,
-            'status' => $this->status,
-            'notes' => $this->notes,
-            'reason' => $this->when($this->status === 'cancelled', $this->reason),
-            'total_amount' => (float)$this->total_amount,
-            'payment' => new PaymentResource($this->whenLoaded('payment'))
+            'check_in_date' => $this->check_in_date,
+            'check_out_date' => $this->check_out_date,
+            'total_amount' => (float) $this->total_amount,
+            'discount_amount' => (float) $this->discount_amount,
+            'status' => $this->status, // pending, confirmed, cancelled, completed
+            'payments' => new PaymentResource($this->whenLoaded('payments')),
+            'created_at' => $this->created_at->toIso8601String(),
         ];
     }
 }

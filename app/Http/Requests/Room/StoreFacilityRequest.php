@@ -4,7 +4,7 @@ namespace App\Http\Requests\Room;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorFacilityRequest extends FormRequest
+class StoreFacilityRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,8 @@ class StorFacilityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:facilities,name|max:50',
-            'icon' => 'nullable|string|max:50', // Nama icon (misal: 'fa-wifi')
+            'name' => 'required|string|max:100|unique:facilities,name',
+            'icon' => 'nullable|string|max:50',
         ];
     }
 }

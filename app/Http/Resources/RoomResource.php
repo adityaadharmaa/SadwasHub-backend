@@ -23,10 +23,10 @@ class RoomResource extends JsonResource
             'status_label' => ucfirst($this->status),
 
             // Load data tipe kamar jika dipanggil via eager loading
-            'type'        => new RoomTypeResource($this->whenLoaded('roomType')),
+            'type'        => new RoomTypeResource($this->whenLoaded('type')),
 
             'created_at'  => $this->created_at?->format('Y-m-d H:i:s'),
-            'created_at_human' => $this->created_at->diffFormHumans()
+            'created_at_human' => $this->created_at->diffForHumans()
         ];
     }
 }

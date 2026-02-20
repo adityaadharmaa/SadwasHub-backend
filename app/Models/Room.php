@@ -19,12 +19,12 @@ class Room extends Model
         'status'
     ];
 
-    public function RoomType(): BelongsTo
+    public function type(): BelongsTo
     {
-        return $this->belongsTo(RoomType::class);
+        return $this->belongsTo(RoomType::class, 'room_type_id');
     }
 
-    public function Bookings(): HasMany
+    public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
