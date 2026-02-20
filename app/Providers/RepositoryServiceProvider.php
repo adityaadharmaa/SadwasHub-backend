@@ -8,6 +8,7 @@ use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ProfileRepository;
 use App\Repositories\Eloquent\RoomRepository;
 use App\Repositories\Eloquent\RoomTypeRepository;
+use App\Repositories\Eloquent\TicketRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Repositories\Interfaces\BookingRepositoryInterface;
 use App\Repositories\Interfaces\FacilityRepositoryInterface;
@@ -15,6 +16,7 @@ use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use App\Repositories\Interfaces\ProfileRepositoryInterface;
 use App\Repositories\Interfaces\RoomRepositoryInterface;
 use App\Repositories\Interfaces\RoomTypeRepositoryInterface;
+use App\Repositories\Interfaces\TicketRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,6 +60,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             PaymentRepositoryInterface::class,
             PaymentRepository::class
+        );
+
+        $this->app->bind(
+            TicketRepositoryInterface::class,
+            TicketRepository::class
         );
     }
 
