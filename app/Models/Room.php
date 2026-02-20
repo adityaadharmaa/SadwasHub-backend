@@ -29,6 +29,11 @@ class Room extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function ticket(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Booking;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Booking\ExtendBookingRequest;
 use App\Http\Requests\Booking\StoreBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Services\Booking\BookingService;
@@ -50,5 +51,12 @@ class BookingController extends Controller
         $booking = $this->bookingService->createBooking($user, $request->validated());
 
         return $this->successResponse($booking, 'Booking created successfully', 201);
+    }
+
+    public function extend(ExtendBookingRequest $request, $id)
+    {
+        $booking = $this->bookingService->extendBooking($request->user(), $id, $request->validated());
+
+        return $this->successResponse(new BookingResource($booking), 'Berhasil membuat tagihan perpanjang sewa', 201);
     }
 }

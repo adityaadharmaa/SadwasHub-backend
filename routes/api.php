@@ -6,6 +6,7 @@ use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Room\FacilityController;
 use App\Http\Controllers\Room\RoomController;
 use App\Http\Controllers\Room\RoomTypeController;
+use App\Http\Controllers\Ticket\TicketController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,10 @@ Route::prefix('v1')->group(function () {
             // Booking Management
             Route::get('/bookings', [BookingController::class, 'index']);
             // End Booking Management
+
+            // Ticket Management
+            Route::apiResource('/tickets', TicketController::class)->only(['index', 'update']);
+            // End Ticket Management
         });
     });
     // ------ End Admin Space ------
@@ -71,7 +76,11 @@ Route::prefix('v1')->group(function () {
                     return response()->json(['message' => 'This is exclusive content for verified tenants!']);
                 });
                 Route::post('/bookings', [BookingController::class, 'store']);
+                Route::post('/bookings/{id}/extend', [BookingController::class, 'extend']);
                 Route::get('/bookings', [BookingController::class, 'myBookings']);
+
+                Route::get('/tickets', [TicketController::class, 'myTickets']);
+                Route::post('/tickets', [TicketController::class, 'store']);
             });
         });
     });

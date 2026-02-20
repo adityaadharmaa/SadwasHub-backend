@@ -118,4 +118,55 @@ class BookingService extends BaseService
             return $booking->load(['room.type', 'payments']);
         });
     }
+
+    public function extendBooking($user, $bookingId, array $data)
+    {
+        $oldBooking = $this->bookingRepo->find($bookingId);
+
+        if (!$oldBooking || $oldBooking->user_id !== $user->id || $oldBooking->status !== 'confirmed') {
+            throw ValidationException::withMessages(['booking' => 'Data sewa tidak valid atau tidak bisa di perpanjang.']);
+        }
+
+        $room = Room::with('type')->find($oldBooking->room_id);
+        $duration = $data['duration_months'];
+
+        $checkInDate = Carbon::parse($oldBooking->check_out_date);
+        $checkOutDate = $checkInDate->copy()->addMonths($duration);
+
+        $pricePerMonth = $room->type->price_per_month;
+        $totalAmount = $pricePerMonth * $duration;
+
+        return $this->atomic(function () use ($user, $room, $checkInDate, $checkOutDate, $totalAmount, $duration) {
+            $newBooking = $this->bookingRepo->create([
+                'user_id' => $user->id,
+                'room_id' => $room->id,
+                'promo_id' => null,
+                'check_in_date' => $checkInDate->toDateString(),
+                'check_out_date' => $checkOutDate->toDateString(),
+                'total_amount' => $totalAmount,
+                'discount_amount' => 0,
+                'status' => 'pending',
+            ]);
+
+            $externalId = 'SC-EXT-' . $newBooking->id . '-' . time();
+            $description = "Perpanjang Sewa Kamar {$room->room_number} untuk {$duration} bulan";
+
+            $xenditResponse = $this->xenditService->createInvoice(
+                $externalId,
+                $totalAmount,
+                $user->email,
+                $description
+            );
+
+            $this->paymentRepo->create([
+                'booking_id' => $newBooking->id,
+                'external_id' => $externalId,
+                'amount' => $totalAmount,
+                'status' => 'pending',
+                'checkout_url' => $xenditResponse['invoice_url']
+            ]);
+
+            return $newBooking->load(['room.type', 'payments']);
+        });
+    }
 }
