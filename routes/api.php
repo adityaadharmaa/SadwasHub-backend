@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Booking\BookingController;
 use App\Http\Controllers\Profile\ProfileController;
@@ -39,7 +40,13 @@ Route::prefix('v1')->group(function () {
     // ------ Admin SPACE ------
     Route::prefix('admin')->group(function () {
         Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+            // Dashboard
+            Route::get('/dashboard', [DashboardController::class, 'index']);
+            // End Dashboard
+
+            // Profile
             Route::post('/verify-profile/{profileId}', [ProfileController::class, 'verify']);
+            // End Profile 
 
             // Room Type Management
             Route::apiResource('/room-types', RoomTypeController::class);
