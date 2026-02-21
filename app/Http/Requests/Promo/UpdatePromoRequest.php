@@ -4,7 +4,7 @@ namespace App\Http\Requests\Promo;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePromoRequest extends FormRequest
+class UpdatePromoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,14 +28,14 @@ class StorePromoRequest extends FormRequest
      */
     public function rules(): array
     {
+        $promoId = $this->route('promo');
         return [
-            'code' => 'required|string|max:50|unique:promos,code|alpha_dash',
-            'type' => 'required|in:percentage,fixed',
-            'reward_amount' => 'required|numeric|min:1',
+            'code' => 'sometimes|string|max:50|alpha_dash|unique:promos,code,' . $promoId,
 
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-
+            'type' => 'sometimes|in:percentage,fixed',
+            'reward_amount' => 'sometimes|numeric|min:1',
+            'start_date' => 'sometimes|date',
+            'end_date' => 'sometimes|date|after_or_equal:start_date',
             'limit' => 'nullable|integer|min:1',
         ];
     }

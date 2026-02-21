@@ -56,15 +56,20 @@ class BookingService extends BaseService
         // 3. Menerapkan Promo (jika ada)
         $discountAmount = 0;
         $promoId = null;
+        $promo = null;
 
         if (!empty($data['promo_code'])) {
             $promo = Promo::where('code', $data['promo_code'])
                 ->where('start_date', '<=', now())
                 ->where('end_date', '>=', now())
+                ->where(function ($query) {
+                    $query->whereNull('limit')
+                        ->orWhere('limit', '>', 0);
+                })
                 ->first();
 
             if (!$promo) {
-                throw ValidationException::withMessages(['promo_code' => 'Kode promo tidak valid atau sudah tidak berlaku.']);
+                throw ValidationException::withMessages(['promo_code' => 'Kode promo tidak valid, sudah kedaluwarsa, atau kuota habis.']);
             }
 
             if ($promo->type === 'percentage') {
@@ -79,7 +84,7 @@ class BookingService extends BaseService
 
         if ($totalAmount < 0) $totalAmount = 0;
 
-        return $this->atomic(function () use ($user, $room, $promoId, $checkInDate, $checkOutDate, $totalAmount, $discountAmount, $duration) {
+        return $this->atomic(function () use ($user, $room, $promo, $promoId, $checkInDate, $checkOutDate, $totalAmount, $discountAmount, $duration) {
             // A. Simpan data booking
             $booking = $this->bookingRepo->create([
                 'user_id' => $user->id,
@@ -114,6 +119,10 @@ class BookingService extends BaseService
 
             // D. Kunci kamar dengan status 'occupied' agar tidak bisa dipesan orang lain
             $room->update(['status' => 'occupied']);
+
+            if ($promo && $promo->limit !== null) {
+                $promo->decrement('limit');
+            }
 
             return $booking->load(['room.type', 'payments']);
         });

@@ -6,6 +6,7 @@ use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\FacilityRepository;
 use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ProfileRepository;
+use App\Repositories\Eloquent\PromoRepository;
 use App\Repositories\Eloquent\RoomRepository;
 use App\Repositories\Eloquent\RoomTypeRepository;
 use App\Repositories\Eloquent\TicketRepository;
@@ -14,6 +15,7 @@ use App\Repositories\Interfaces\BookingRepositoryInterface;
 use App\Repositories\Interfaces\FacilityRepositoryInterface;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use App\Repositories\Interfaces\ProfileRepositoryInterface;
+use App\Repositories\Interfaces\PromoRepositoryInterface;
 use App\Repositories\Interfaces\RoomRepositoryInterface;
 use App\Repositories\Interfaces\RoomTypeRepositoryInterface;
 use App\Repositories\Interfaces\TicketRepositoryInterface;
@@ -29,7 +31,7 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->bind(
             UserRepositoryInterface::class,
-            UserRepository::class
+            UserRepository::class,
         );
 
         $this->app->bind(
@@ -41,6 +43,7 @@ class RepositoryServiceProvider extends ServiceProvider
             RoomTypeRepositoryInterface::class,
             RoomTypeRepository::class
         );
+
 
         $this->app->bind(
             FacilityRepositoryInterface::class,
@@ -60,6 +63,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             PaymentRepositoryInterface::class,
             PaymentRepository::class
+        );
+
+        $this->app->bind(
+            PromoRepositoryInterface::class,
+            PromoRepository::class
         );
 
         $this->app->bind(

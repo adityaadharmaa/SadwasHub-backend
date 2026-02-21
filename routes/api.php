@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Booking\BookingController;
 use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Room\FacilityController;
 use App\Http\Controllers\Room\RoomController;
 use App\Http\Controllers\Room\RoomTypeController;
@@ -52,6 +53,10 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('/rooms', RoomController::class);
             // End Room Management
 
+            // Promo Management
+            Route::apiResource('/promos', PromoController::class);
+            // End Promo Management
+
             // Booking Management
             Route::get('/bookings', [BookingController::class, 'index']);
             // End Booking Management
@@ -81,6 +86,8 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('/tickets', [TicketController::class, 'myTickets']);
                 Route::post('/tickets', [TicketController::class, 'store']);
+
+                Route::get('/promos/active', [PromoController::class, 'activePromos']);
             });
         });
     });
