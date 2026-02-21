@@ -10,7 +10,12 @@ class Attachment extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['file_path', 'file_type', 'attachable_id', 'attachable_type'];
+    protected $fillable = [
+        'attachable_id',
+        'attachable_type',
+        'file_path',
+        'file_type',
+    ];
 
     public function attachable(): MorphTo
     {

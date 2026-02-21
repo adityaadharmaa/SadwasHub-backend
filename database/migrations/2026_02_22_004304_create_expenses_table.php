@@ -12,8 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('expenses', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->decimal('amount', 12, 2);
+            $table->date('expense_date');
+            $table->enum('category', ['operational', 'maintenance', 'salary', 'tax', 'other']);
+
+            $table->foreignUuid('room_id')->nullable()->constrained('rooms')->nullOnDelete();
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

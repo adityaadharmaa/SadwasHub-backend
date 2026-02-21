@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Booking\BookingController;
+use App\Http\Controllers\Expense\ExpenseController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Room\FacilityController;
@@ -47,6 +48,10 @@ Route::prefix('v1')->group(function () {
             // Profile
             Route::post('/verify-profile/{profileId}', [ProfileController::class, 'verify']);
             // End Profile 
+
+            // Expense
+            Route::post('/expense', [ExpenseController::class, 'store']);
+            // End Expense
 
             // Room Type Management
             Route::apiResource('/room-types', RoomTypeController::class);

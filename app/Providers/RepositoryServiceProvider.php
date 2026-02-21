@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Repositories\Eloquent\BookingRepository;
+use App\Repositories\Eloquent\ExpenseRepository;
 use App\Repositories\Eloquent\FacilityRepository;
 use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ProfileRepository;
@@ -12,6 +13,7 @@ use App\Repositories\Eloquent\RoomTypeRepository;
 use App\Repositories\Eloquent\TicketRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Repositories\Interfaces\BookingRepositoryInterface;
+use App\Repositories\Interfaces\ExpenseRepositoryInterface;
 use App\Repositories\Interfaces\FacilityRepositoryInterface;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use App\Repositories\Interfaces\ProfileRepositoryInterface;
@@ -73,6 +75,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             TicketRepositoryInterface::class,
             TicketRepository::class
+        );
+
+        $this->app->bind(
+            ExpenseRepositoryInterface::class,
+            ExpenseRepository::class
         );
     }
 

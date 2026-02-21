@@ -6,9 +6,10 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Room;
 use App\Models\Ticket;
+use App\Services\BaseService;
 use Carbon\Carbon;
 
-class DashboardService
+class DashboardService extends BaseService
 {
     public function getAnalytics()
     {
