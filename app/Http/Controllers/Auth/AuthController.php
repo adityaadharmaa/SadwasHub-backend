@@ -99,13 +99,11 @@ class AuthController extends Controller
 
     public function redirectToProvider($provider)
     {
-        if ($provider !== 'google') {
+        if (!in_array($provider, ['google', 'github'])) {
             return $this->errorResponse('Provider tidak didukung.', 400);
         }
 
-        $url = Socialite::driver($provider)->stateless()->redirect()->getTargetUrl();
-
-        return $this->successResponse(['url' => $url], 'Silakan redirect ke URL berikut.');
+        return Socialite::driver($provider)->stateless()->redirect();
     }
 
     public function handleProviderCallback($provider)
@@ -113,12 +111,17 @@ class AuthController extends Controller
         try {
             $result = $this->authService->handleSocialLogin($provider);
 
-            return $this->successResponse([
-                'user' => new UserResource($result['user']),
-                'token' => $result['token']
-            ], 'Login social berhasil.');
+            $token = $result['token'];
+
+            // Arahkan kembali ke React (port 5173) ke halaman khusus penangkap token
+            // Anda bisa menggunakan env('FRONTEND_URL', 'http://localhost:5173') jika mau lebih dinamis
+            $frontendUrl = 'http://localhost:5173';
+
+            return redirect()->to($frontendUrl . '/auth/callback?token=' . $token);
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            // Jika batal/gagal, kembalikan ke halaman login React dengan pesan error
+            $frontendUrl = 'http://localhost:5173';
+            return redirect()->to($frontendUrl . '/login?error=' . urlencode($e->getMessage()));
         }
     }
 }
