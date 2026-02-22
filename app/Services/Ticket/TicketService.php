@@ -5,6 +5,7 @@ namespace App\Services\Ticket;
 use App\Models\Booking;
 use App\Models\User;
 use App\Notifications\NewTicketNotification;
+use App\Notifications\TicketStatusUpdatedNotification;
 use App\Repositories\Interfaces\TicketRepositoryInterface;
 use App\Services\BaseService;
 use Illuminate\Validation\ValidationException;
@@ -77,7 +78,14 @@ class TicketService extends BaseService
 
             $this->ticketRepo->update($id, $data);
 
-            return $ticket->fresh()->load(['user.profile', 'room.type']);
+
+            $updatedTicket = $ticket->fresh()->load(['user.profile', 'room.type']);
+
+            if ($updatedTicket->user) {
+                $updatedTicket->user->notify(new TicketStatusUpdatedNotification($updatedTicket));
+            }
+
+            return $updatedTicket;
         });
     }
 }

@@ -40,12 +40,10 @@ Route::prefix('v1')->group(function () {
 
     // ---- Sanctum ----
     Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index']);
         Route::get('/notifications/unread', [NotificationController::class, 'unread']);
         Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-    })
-
-
-    ;
+    });
     // ---- End Sanctum ----
 
 
