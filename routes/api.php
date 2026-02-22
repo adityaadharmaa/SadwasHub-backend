@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Booking\BookingController;
 use App\Http\Controllers\Expense\ExpenseController;
+use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Room\FacilityController;
@@ -36,6 +37,16 @@ Route::prefix('v1')->group(function () {
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     });
     // ---- End Auth SPACE ----
+
+    // ---- Sanctum ----
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/notifications/unread', [NotificationController::class, 'unread']);
+        Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    })
+
+
+    ;
+    // ---- End Sanctum ----
 
 
     // ------ Admin SPACE ------

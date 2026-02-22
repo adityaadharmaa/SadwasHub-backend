@@ -82,7 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Booking::class);
     }
 
-    public function notifications(): HasMany
+    public function unread(): HasMany
     {
         return $this->hasMany(Notification::class);
     }
@@ -95,5 +95,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');
+    }
+
+    public function notificationLogs()
+    {
+        return $this->hasMany(NotificationLog::class);
     }
 }

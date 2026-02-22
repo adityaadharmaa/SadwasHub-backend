@@ -3,6 +3,8 @@
 namespace App\Services\Ticket;
 
 use App\Models\Booking;
+use App\Models\User;
+use App\Notifications\NewTicketNotification;
 use App\Repositories\Interfaces\TicketRepositoryInterface;
 use App\Services\BaseService;
 use Illuminate\Validation\ValidationException;
@@ -52,7 +54,15 @@ class TicketService extends BaseService
 
         return $this->atomic(function () use ($data) {
             $ticket = $this->ticketRepo->create($data);
-            return $ticket->load(['room.type']);
+            $ticket->load(['room.type']);
+
+            $admins = User::role('admin')->get();
+
+            foreach ($admins as $admin) {
+                $admin->notify(new NewTicketNotification($ticket));
+            }
+
+            return $ticket;
         });
     }
 
