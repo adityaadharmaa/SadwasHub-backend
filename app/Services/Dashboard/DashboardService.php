@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Room;
 use App\Models\Ticket;
+use App\Models\Expense;
 use App\Services\BaseService;
 use Carbon\Carbon;
 
@@ -31,6 +32,14 @@ class DashboardService extends BaseService
             ->whereYear('created_at', $currentYear)
             ->sum('amount');
 
+        // Mengambil total pengeluaran berdasarkan tanggal struk/nota
+        $expenseThisMonth = Expense::whereMonth('expense_date', $currentMonth)
+            ->whereYear('expense_date', $currentYear)
+            ->sum('amount');
+
+        // Laba bersih = Pendapatan kotor - Pengeluaran
+        $profitThisMonth = $revenueThisMonth - $expenseThisMonth;
+
         // 3. Tiket komplain (Yang butuh perhatian admin)
         $pendingTickets = Ticket::whereIn('status', ['open', 'in_progress'])->count();
 
@@ -42,7 +51,10 @@ class DashboardService extends BaseService
 
         // 5. Grafik tren pendapatan
         $chartLabels = [];
-        $chartData = [];
+        $revenueData = [];
+        $expenseData = [];
+        $profitData = [];
+        // $chartData = [];
 
         // Looping dari 5 bulan lalu sampai bulan ini (total 6 bulan)
         for ($i = 5; $i >= 0; $i--) {
@@ -58,9 +70,17 @@ class DashboardService extends BaseService
                 ->whereYear('created_at', $date->year)
                 ->sum('amount');
 
+            $monthlyExpense = Expense::whereMonth('expense_date', $date->month)
+                ->whereYear('expense_date', $date->year)
+                ->sum('amount');
+
+            $monthlyProfit = $monthlyRevenue - $monthlyExpense;
+
             // Masukkan ke dalam array untuk frontend  
             $chartLabels[] = $monthLabel;
-            $chartData[] = (float) $monthlyRevenue;
+            $revenueData[] = (float) $monthlyRevenue;
+            $expenseData[] = (float) $monthlyExpense;
+            $profitData[] = (float) $monthlyProfit;
         }
 
         return [
@@ -72,7 +92,13 @@ class DashboardService extends BaseService
             ],
             'financials' => [
                 'revenue_this_month' => (float) $revenueThisMonth,
-                'formatted_revenue' => 'Rp. ' . number_format($revenueThisMonth, 0, ',', '.')
+                'formatted_revenue' => 'Rp ' . number_format($revenueThisMonth, 0, ',', '.'),
+
+                'expense_this_month' => (float) $expenseThisMonth,
+                'formatted_expense' => 'Rp ' . number_format($expenseThisMonth, 0, ',', '.'),
+
+                'profit_this_month' => (float) $profitThisMonth,
+                'formatted_profit' => 'Rp ' . number_format($profitThisMonth, 0, ',', '.'),
             ],
             'tickets' => [
                 'requires_action' => $pendingTickets
@@ -82,9 +108,11 @@ class DashboardService extends BaseService
             ],
             // Data grafik siap pakai untuk frontend
             'charts' => [
-                'revenue_trend' => [
+                'financial_trend' => [
                     'labels' => $chartLabels,
-                    'data' => $chartData
+                    'revenue_data' => $revenueData,
+                    'expense_data' => $expenseData,
+                    'profit_data' => $profitData,
                 ],
             ]
         ];
