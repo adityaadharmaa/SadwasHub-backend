@@ -14,7 +14,7 @@ class RoomRepository extends BaseRepository implements RoomRepositoryInterface
 
     public function getAll(?string $search = null, ?string $status = null, ?string $roomTypeId = null, int $perPage = 10)
     {
-        $query = $this->model->with('type');
+        $query = $this->model->with(['type', 'attachments']);
 
         if (!empty($search)) {
             $query->where('room_number', 'like', '%' . $search . '%');

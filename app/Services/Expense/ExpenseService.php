@@ -71,4 +71,30 @@ class ExpenseService extends BaseService
             return $expense->load('attachments');
         });
     }
+
+    public function getAllExpenses(int $perPage = 10, ?string $search = null, ?string $category = null)
+    {
+        // Langsung panggil fungsi dari Repository! Sangat rapi.
+        return $this->expenseRepo->getAllWithFilters($perPage, $search, $category);
+    }
+
+    public function deleteExpense($id)
+    {
+        return $this->atomic(function () use ($id) {
+            $expense = $this->expenseRepo->find($id);
+            if (!$expense) {
+                throw new \Exception("Data pengeluaran tidak ditemukan.");
+            }
+
+            // Hapus file fisik dari storage jika ada
+            foreach ($expense->attachments as $attachment) {
+                if (Storage::disk('public')->exists($attachment->file_path)) {
+                    Storage::disk('public')->delete($attachment->file_path);
+                }
+                $attachment->delete();
+            }
+
+            return $this->expenseRepo->delete($id);
+        });
+    }
 }

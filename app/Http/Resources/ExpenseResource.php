@@ -26,20 +26,19 @@ class ExpenseResource extends JsonResource
             'category' => $this->category,
             'room_id' => $this->room_id,
 
-            // Tampilkan data kamar jika relasinya di-load (Opsional tapi sangat berguna)
             'room' => $this->whenLoaded('room', function () {
+                if (!$this->room) return null; // Cegah error jika null
+
                 return [
                     'id' => $this->room->id,
                     'room_number' => $this->room->room_number,
                 ];
             }),
 
-            // Format data struk/nota menjadi URL yang siap pakai untuk frontend
             'attachments' => $this->whenLoaded('attachments', function () {
                 return $this->attachments->map(function ($attachment) {
                     return [
                         'id' => $attachment->id,
-                        // Gunakan fungsi asset() untuk menghasilkan full URL (http://localhost:8000/storage/...)
                         'file_url' => asset('storage/' . $attachment->file_path),
                         'file_type' => $attachment->file_type,
                     ];

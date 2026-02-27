@@ -21,7 +21,7 @@ class Expense extends Model
         'room_id',
     ];
 
-    public function rooms(): BelongsTo
+    public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class);
     }

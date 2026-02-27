@@ -25,6 +25,15 @@ class RoomResource extends JsonResource
             // Load data tipe kamar jika dipanggil via eager loading
             'type'        => new RoomTypeResource($this->whenLoaded('type')),
 
+            'images' => $this->whenLoaded('attachments', function () {
+                return $this->attachments->map(function ($attachment) {
+                    return [
+                        'id' => $this->id, // ID attachment untuk retained_images saat edit
+                        'url' => asset('storage/' . $attachment->file_path)
+                    ];
+                });
+            }),
+
             'created_at'  => $this->created_at?->format('Y-m-d H:i:s'),
             'created_at_human' => $this->created_at->diffForHumans()
         ];

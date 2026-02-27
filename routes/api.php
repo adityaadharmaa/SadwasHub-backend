@@ -7,9 +7,11 @@ use App\Http\Controllers\Expense\ExpenseController;
 use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Promo\PromoController;
+use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\Room\FacilityController;
 use App\Http\Controllers\Room\RoomController;
 use App\Http\Controllers\Room\RoomTypeController;
+use App\Http\Controllers\Tenant\TenantController;
 use App\Http\Controllers\Ticket\TicketController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use Illuminate\Http\Request;
@@ -58,8 +60,17 @@ Route::prefix('v1')->group(function () {
             Route::post('/verify-profile/{profileId}', [ProfileController::class, 'verify']);
             // End Profile 
 
+            // Tenant 
+            Route::apiResource('/tenants', TenantController::class)->only('index', 'show');
+            // End Tenant
+
+            // Role & Permission
+            Route::get('/permissions', [RoleController::class, 'permissions']);
+            Route::apiResource('roles', RoleController::class)->except(['show']);
+            // End Role & Permission
+
             // Expense
-            Route::post('/expense', [ExpenseController::class, 'store']);
+            Route::apiResource('/expenses', ExpenseController::class);
             // End Expense
 
             // Room Type Management

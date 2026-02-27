@@ -26,6 +26,9 @@ class StoreRoomRequest extends FormRequest
             // Nomor kamar harus unik agar tidak ada duplikasi
             'room_number' => 'required|string|max:20|unique:rooms,room_number',
             'status' => 'nullable|in:available,occupied,maintenance',
+            'images'   => 'nullable|array',
+            // Validasi file: harus berupa gambar, maksimal 5MB (karena nanti kita kompres)
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ];
     }
 }

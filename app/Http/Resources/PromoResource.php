@@ -22,6 +22,7 @@ class PromoResource extends JsonResource
         return [
             'id' => $this->id,
             'code' => $this->code,
+            'type' => $this->type,
             'reward_amount' => (float) $this->reward_amount,
             'start_date' => $startDate->format('Y-m-d'),
             'end_date' => $endDate->format('Y-m-d'),

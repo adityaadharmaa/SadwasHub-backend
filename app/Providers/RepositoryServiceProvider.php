@@ -8,8 +8,10 @@ use App\Repositories\Eloquent\FacilityRepository;
 use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Eloquent\ProfileRepository;
 use App\Repositories\Eloquent\PromoRepository;
+use App\Repositories\Eloquent\RoleRepository;
 use App\Repositories\Eloquent\RoomRepository;
 use App\Repositories\Eloquent\RoomTypeRepository;
+use App\Repositories\Eloquent\TenantRepository;
 use App\Repositories\Eloquent\TicketRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Repositories\Interfaces\BookingRepositoryInterface;
@@ -18,8 +20,10 @@ use App\Repositories\Interfaces\FacilityRepositoryInterface;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use App\Repositories\Interfaces\ProfileRepositoryInterface;
 use App\Repositories\Interfaces\PromoRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Interfaces\RoomRepositoryInterface;
 use App\Repositories\Interfaces\RoomTypeRepositoryInterface;
+use App\Repositories\Interfaces\TenantRepositoryInterface;
 use App\Repositories\Interfaces\TicketRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -80,6 +84,16 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             ExpenseRepositoryInterface::class,
             ExpenseRepository::class
+        );
+
+        $this->app->bind(
+            TenantRepositoryInterface::class,
+            TenantRepository::class
+        );
+
+        $this->app->bind(
+            RoleRepositoryInterface::class,
+            RoleRepository::class
         );
     }
 

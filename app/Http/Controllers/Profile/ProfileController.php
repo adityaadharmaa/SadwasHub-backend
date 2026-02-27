@@ -26,11 +26,27 @@ class ProfileController extends Controller
     public function me(Request $request)
     {
         $user = $request->user()->load('profile');
-        return $this->successResponse(new UserResource($user), 'Data profile berhasil diambil');
+
+        $permissions = $user->getAllPermissions()->pluck('name');
+        $roles = $user->getRoleNames();
+
+        $data = [
+            'user' => new UserResource($user),
+            'roles' => $roles,
+            'permissions' => $permissions,
+        ];
+
+        return $this->successResponse($data, 'Data profile berhasil diambil');
     }
+
 
     public function update(UpdateProfileRequest $request)
     {
+        // 1. CEK PERMISSION SEBELUM MENGEKSEKUSI LOGIKA
+        if (!$request->user()->can('edit-profile')) {
+            return $this->errorResponse('Akses Ditolak: Anda tidak memiliki izin untuk mengubah profil.', 403);
+        }
+
         $user = $request->user();
 
         $update = $this->profileService->updateProfile($user, $request->validated());
@@ -43,6 +59,11 @@ class ProfileController extends Controller
 
     public function verify(VerifyProfileRequest $request, $profileId)
     {
+        // 1. CEK PERMISSION ADMIN SEBELUM MEMVERIFIKASI
+        if (!$request->user()->can('verify-ktp')) {
+            return $this->errorResponse('Akses Ditolak: Anda tidak memiliki wewenang untuk memverifikasi dokumen KTP.', 403);
+        }
+
         $updatedProfile = $this->profileService->verifyProfile($profileId, $request->validated());
 
         $status = $request->is_verified ? 'disetujui' : 'ditolak';
@@ -56,6 +77,7 @@ class ProfileController extends Controller
     {
         $profileOwner = UserProfile::where('ktp_path', 'like', "%{$filename}%")->firstOrFail();
 
+        // Gate 'viewKtp' tetap dipertahankan karena ini memvalidasi apakah user melihat KTP-nya sendiri atau KTP orang lain
         Gate::authorize('viewKtp', $profileOwner);
 
         $path = "ktp_images/" . $filename;
