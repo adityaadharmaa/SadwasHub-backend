@@ -13,17 +13,18 @@ class UserProfile extends Model
     protected $fillable = [
         'user_id',
         'full_name',
-        'nik',
         'phone_number',
-        'gender',
-        'birth_date',
+        'nik',
         'address',
-        'occupation',
-        'emergency_contact_name',
-        'emergency_contact_phone',
         'ktp_path',
         'is_verified',
         'admin_note',
+        // Tambahkan 5 baris ini agar bisa disimpan ke database:
+        'gender',
+        'birth_date',
+        'occupation',
+        'emergency_contact_name',
+        'emergency_contact_phone'
     ];
 
     protected $casts = [
