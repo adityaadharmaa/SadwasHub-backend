@@ -1,0 +1,28 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main # Robot akan bekerja setiap kali ada push ke branch 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Eksekusi perintah di VPS secara otomatis
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            # Masuk ke folder project di VPS
+            cd ~/SadewasHub
+            
+            # Tarik kode terbaru dari GitHub
+            git pull origin main
+            
+            # Refresh cache Laravel di dalam Docker (-T agar tidak error di background)
+            sudo docker compose exec -T app php artisan optimize
