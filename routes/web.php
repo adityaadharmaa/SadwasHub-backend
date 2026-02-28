@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return response()->json([
         'status' => 'success',
-        'message' => 'Sadewas Hub API is rooning smoothly.',
+        'message' => 'Sadewas Hub API is runing smoothly.',
         'version' => '1.0.0',
         'timestamp' => now()->toDateString()
     ]);
