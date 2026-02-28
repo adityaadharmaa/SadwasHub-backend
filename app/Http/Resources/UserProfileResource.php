@@ -18,20 +18,22 @@ class UserProfileResource extends JsonResource
         return [
             'id' => $this->id,
             'full_name' => $this->full_name,
-            'nik' => $this->nik,
             'phone_number' => $this->phone_number,
-            'gender' => $this->gender,
-            'birth_date' => $this->birth_date,
+            'nik' => $this->nik,
             'address' => $this->address,
-            'occupation' => $this->occupation,
-            'emergency_contact' => [
-                'name' => $this->emergency_contact_name,
-                'phone' => $this->emergency_contact_phone,
-            ],
-            'ktp_url' => $this->getKtpUrl($this->ktp_path),
-
-            'is_verified' => (bool) $this->is_verified,
+            'ktp_url' => $this->ktp_path ? asset('storage/' . $this->ktp_path) : null,
+            'is_verified' => $this->is_verified,
             'admin_note' => $this->admin_note,
+            
+            // --- TAMBAHKAN 5 BARIS INI ---
+            'gender' => $this->gender,
+            'birth_date' => $this->birth_date ? $this->birth_date->format('Y-m-d') : null,
+            'occupation' => $this->occupation,
+            'emergency_contact_name' => $this->emergency_contact_name,
+            'emergency_contact_phone' => $this->emergency_contact_phone,
+
+            'created_at' => $this->created_at->toIso8601String(),
+            'updated_at' => $this->updated_at->toIso8601String(),
         ];
     }
 
