@@ -18,11 +18,11 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            # Masuk ke folder project di VPS
-            cd ~/SadewasHub
+            # Masuk ke folder project yang sudah dipindah
+            cd /home/sadewas_admin/SadewasHub
             
             # Tarik kode terbaru dari GitHub
             git pull origin main
             
-            # Refresh cache Laravel di dalam Docker (-T agar tidak error di background)
-            sudo docker compose exec -T app php artisan optimize
+            # Eksekusi docker tanpa sudo!
+            docker compose exec -T app php artisan optimize
