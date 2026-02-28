@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-# Install dependencies sistem (ditambah dukungan untuk WebP, JPEG, dan Freetype)
+# Install dependencies sistem, termasuk dukungan WebP dan JPEG
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -13,13 +13,13 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     libfreetype6-dev
 
-# Bersihkan cache apt
+# Bersihkan cache apt agar ukuran container lebih ringan
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Konfigurasi ekstensi GD agar mendukung WebP dan JPEG
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 
-# Install ekstensi PHP
+# Install ekstensi PHP yang dibutuhkan Laravel
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Dapatkan Composer versi terbaru
@@ -28,8 +28,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory ke /var/www
 WORKDIR /var/www
 
-# Copy seluruh file project
+# Copy seluruh file project ke dalam container
 COPY . .
 
-# Set permission agar web server bisa menulis ke folder storage dan cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Set hak akses aman untuk folder aplikasi
+RUN chown -R www-data:www-data /var/www
