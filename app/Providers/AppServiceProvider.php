@@ -37,5 +37,9 @@ class AppServiceProvider extends ServiceProvider
 
             return $frontendUrl . '?url=' . urlencode($verifyUrl);
         });
+
+        Gate::define('viewPulse', function($user = null){
+            return true;
+        })
     }
 }
