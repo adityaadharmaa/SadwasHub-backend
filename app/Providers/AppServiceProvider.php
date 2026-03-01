@@ -40,6 +40,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('viewPulse', function($user = null){
             return true;
-        })
+        });
     }
 }
