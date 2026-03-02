@@ -46,11 +46,10 @@ class TenantResource extends JsonResource
         if (!$path || $path === '-') return null;
         if (str_starts_with($path, 'http')) return $path;
 
-        // Ekstrak nama filenya saja (contoh: ktp-212605-xxx.jpg)
+        // Ekstrak nama filenya saja (contoh: ktp-123.jpg)
         $filename = basename($path);
 
-        // Arahkan ke endpoint khusus KTP (sesuaikan dengan prefix route API Anda, misal /api/v1)
-        // Pastikan URL ini benar-benar sama dengan route yang terdaftar di api.php
-        return url("/api/v1/profile/ktp/" . $filename);
+        // PERBAIKAN: Kembalikan path relatifnya saja, TANPA fungsi url()
+        return "/profile/ktp/" . $filename;
     }
 }
