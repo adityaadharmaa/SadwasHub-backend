@@ -30,6 +30,9 @@ class UpdateRoomRequest extends FormRequest
             'room_number' => 'sometimes|string|max:20|unique:rooms,room_number,' . $roomId,
             'status' => 'sometimes|in:available,occupied,maintenance',
 
+            'retained_images' => 'nullable|array',
+            'retained_images.*' => 'string',
+
             'images'   => 'nullable|array',
             // Validasi file: harus berupa gambar, maksimal 5MB (karena nanti kita kompres)
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',

@@ -74,7 +74,8 @@ Route::prefix('v1')->group(function () {
             // End Expense
 
             // Room Type Management
-            Route::apiResource('/room-types', RoomTypeController::class);
+            Route::post('/rooms/{room}/update', [RoomController::class, 'update']);
+            Route::apiResource('/room-types', RoomTypeController::class)->except(['update']);
             // End Room Type Management
 
             // Facility Management
@@ -134,6 +135,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/update', [ProfileController::class, 'update']);
         });
     });
+    
     // ------ End General Profile Space ------
 
     // ------ Webhook SPACE ------

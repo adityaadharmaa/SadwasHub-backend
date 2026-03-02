@@ -25,6 +25,8 @@ class RoomTypeResource extends JsonResource
             'price_per_day' => (float) $this->price_per_day,
             'price_per_week' => (float) $this->price_per_week,
             'price_per_month' => (float) $this->price_per_month,
+
+            'price_formatted' => 'Rp ' . number_format($this->price_per_month, 0, ','. '.'),
             
             'facilities' => FacilityResource::collection($this->whenLoaded('facilities')),
             'created_at' => $this->created_at->toIso8601String(),

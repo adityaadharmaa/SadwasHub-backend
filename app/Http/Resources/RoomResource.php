@@ -28,7 +28,7 @@ class RoomResource extends JsonResource
             'images' => $this->whenLoaded('attachments', function () {
                 return $this->attachments->map(function ($attachment) {
                     return [
-                        'id' => $this->id, // ID attachment untuk retained_images saat edit
+                        'id' => $attachment->id, // ID attachment untuk retained_images saat edit
                         'url' => asset('storage/' . $attachment->file_path)
                     ];
                 });
