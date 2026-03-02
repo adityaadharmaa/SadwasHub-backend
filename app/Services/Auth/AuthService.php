@@ -120,7 +120,7 @@ class AuthService extends BaseService
                     'full_name' => $socialUser->getName(),
                     'nik' => 'TEMP-' . Str::random(10),
                     'phone_number' => '-',
-                    'ktp_path' => $socialUser->getAvatar(),
+                    'ktp_path' => '-',
                     'is_verified' => false
                 ]);
             } else {

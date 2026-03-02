@@ -10,12 +10,17 @@ class TenantResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $ktpAttachment = $this->profile?->attachments()->where('file_type', 'ktp')->latest()->first();
+        
+        // Prioritaskan path dari attachment, jika tidak ada baru gunakan kolom lama (fallback)
+        $ktpPath = $ktpAttachment ? $ktpAttachment->file_path : $this->profile?->ktp_path;
+
         // Logika Status KTP Murni dari Profile
         $status = 'unverified';
         if ($this->profile) {
             if ($this->profile->is_verified) {
                 $status = 'verified';
-            } elseif (!empty($this->profile->ktp_path)) {
+            } elseif (!empty($ktpPath) && $ktpPath !== '-') {
                 $status = 'pending';
             }
         }
@@ -31,8 +36,8 @@ class TenantResource extends JsonResource
                 'id'          => $this->profile?->id,
                 'nik'         => $this->profile?->nik,
                 'address'     => $this->profile?->address,
-                // Gunakan Helper Function untuk URL KTP (Sama seperti UserProfileResource Anda)
-                'ktp_url'     => $this->getKtpUrl($this->profile?->ktp_path),
+                // 🌟 PERBAIKAN 2: Gunakan path yang sudah dikoreksi
+                'ktp_url'     => $this->getKtpUrl($ktpPath), 
                 'admin_note'  => $this->profile?->admin_note,
             ],
 

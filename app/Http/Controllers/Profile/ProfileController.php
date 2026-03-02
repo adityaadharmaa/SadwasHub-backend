@@ -88,7 +88,10 @@ class ProfileController extends Controller
             $profileOwner = $attachment->attachable;
         } else {
             // Jika tidak ada di attachments, cari di tabel user_profiles (Sistem Lama)
-            $profileOwner = UserProfile::where('ktp_path', $path)->first();
+            $profileOwner = UserProfile::whereHas('attachments', function ($query) use ($filename) {
+            $query->where('file_type', 'ktp')
+                  ->where('file_path', 'like', "%{$filename}%");
+            })->orWhere('ktp_path', 'like', "%{$filename}%")->firstOrFail();
             
             // Jika di kedua tabel tidak ada sama sekali
             if (!$profileOwner) {
