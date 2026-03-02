@@ -51,7 +51,9 @@ class AuthService extends BaseService
 
             event(new Registered($user));
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $expiration = now()->addHours(8);
+
+            $token = $user->createToken('auth_token', ['*'] ,$expiration)->plainTextToken;
 
             return [
                 'user' => $user,
@@ -131,7 +133,9 @@ class AuthService extends BaseService
                 }
             }
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $expired = now()->addDays(7);
+
+            $token = $user->createToken('auth_token',['*'], $expired)->plainTextToken;
 
             return [
                 'user' => $user,

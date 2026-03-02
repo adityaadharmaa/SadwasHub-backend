@@ -7,6 +7,7 @@ use App\Http\Requests\Booking\ExtendBookingRequest;
 use App\Http\Requests\Booking\StoreBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Services\Booking\BookingService;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -43,6 +44,21 @@ class BookingController extends Controller
             'message' => 'Daftar booking Anda berhasil diambil.',
             'status' => 'success'
         ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        // Cari booking berdasarkan ID, pastikan itu milik user yang sedang login
+        $booking = Booking::with(['room.type', 'payments', 'user.profile'])
+            ->where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$booking) {
+            return response()->json(['message' => 'Data tagihan tidak ditemukan.'], 404);
+        }
+
+        return $this->successResponse(new BookingResource($booking), 'Detail tagihan berhasil diambil.');
     }
 
     public function store(StoreBookingRequest $request)

@@ -11,10 +11,12 @@ class RoomType extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['name', 'description', 'price_per_month'];
+    protected $fillable = ['name', 'description', 'price_per_month', 'price_per_day', 'price_per_week'];
 
     protected $casts = [
-        'price_per_month' => 'decimal:2'
+        'price_per_month' => 'decimal:2',
+        'price_per_day' => 'decimal:2',   // Tambahkan ini
+        'price_per_week' => 'decimal:2'
     ];
 
     public function rooms(): HasMany

@@ -45,13 +45,25 @@ class BookingService extends BaseService
             throw ValidationException::withMessages(['room_id' => 'Mohon maaf, kamar yang Anda pilih sedang tidak tersedia.']);
         }
 
-        // 2. Menghitung Tanggal dan Harga Subtotal
-        $duration = $data['duration_months'];
+        // 2. Menghitung Tanggal dan Harga Subtotal secara Dinamis (Hybrid)
+        $duration = $data['duration'];
+        $rentType = $data['rent_type'];
+        
         $checkInDate = Carbon::parse($data['check_in_date']);
-        $checkOutDate = $checkInDate->copy()->addMonths($duration);
+        $checkOutDate = $checkInDate->copy();
+        $subTotal = 0;
 
-        $pricePerMonth = $room->type->price_per_month;
-        $subTotal = $pricePerMonth * $duration;
+        // Logika harian, mingguan, bulanan
+        if ($rentType === 'daily') {
+            $checkOutDate->addDays($duration);
+            $subTotal = $room->type->price_per_day * $duration;
+        } elseif ($rentType === 'weekly') {
+            $checkOutDate->addWeeks($duration);
+            $subTotal = $room->type->price_per_week * $duration;
+        } elseif ($rentType === 'monthly') {
+            $checkOutDate->addMonths($duration);
+            $subTotal = $room->type->price_per_month * $duration;
+        }
 
         // 3. Menerapkan Promo (jika ada)
         $discountAmount = 0;
@@ -81,25 +93,30 @@ class BookingService extends BaseService
         }
 
         $totalAmount = $subTotal - $discountAmount;
-
         if ($totalAmount < 0) $totalAmount = 0;
 
-        return $this->atomic(function () use ($user, $room, $promo, $promoId, $checkInDate, $checkOutDate, $totalAmount, $discountAmount, $duration) {
+        return $this->atomic(function () use ($user, $room, $promo, $promoId, $checkInDate, $checkOutDate, $totalAmount, $discountAmount, $duration, $rentType, $data) {
+            
             // A. Simpan data booking
             $booking = $this->bookingRepo->create([
                 'user_id' => $user->id,
                 'room_id' => $room->id,
                 'promo_id' => $promoId,
+                'rent_type' => $rentType, // Simpan tipe sewa ke DB
                 'check_in_date' => $checkInDate->toDateString(),
                 'check_out_date' => $checkOutDate->toDateString(),
                 'total_amount' => $totalAmount,
                 'discount_amount' => $discountAmount,
+                'notes' => $data['notes'] ?? null, // PERBAIKAN BUG DISINI
                 'status' => 'pending'
             ]);
 
             // B. Minta Link Pembayaran dari Xendit
             $externalId = 'SC-' . $booking->id . '-' . time();
-            $description = "Sewa Kamar {$room->room_number} untuk {$duration} bulan";
+            
+            // Label deskripsi dinamis (Misal: Sewa daily Kamar 01 untuk 3 hari)
+            $timeLabel = $rentType === 'daily' ? 'hari' : ($rentType === 'weekly' ? 'minggu' : 'bulan');
+            $description = "Sewa {$rentType} Kamar {$room->room_number} untuk {$duration} {$timeLabel}";
 
             $xenditResponse = $this->xenditService->createInvoice(
                 $externalId,
@@ -108,7 +125,7 @@ class BookingService extends BaseService
                 $description
             );
 
-            // C. Simpan Data Payment dari response Xendit
+            // C. Simpan Data Payment
             $this->paymentRepo->create([
                 'booking_id' => $booking->id,
                 'external_id' => $externalId,
@@ -117,7 +134,7 @@ class BookingService extends BaseService
                 'checkout_url' => $xenditResponse['invoice_url']
             ]);
 
-            // D. Kunci kamar dengan status 'occupied' agar tidak bisa dipesan orang lain
+            // D. Kunci kamar
             $room->update(['status' => 'occupied']);
 
             if ($promo && $promo->limit !== null) {

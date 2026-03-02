@@ -22,26 +22,49 @@ class UpdateProfileRequest extends BaseRequest
      */
     public function rules(): array
     {
-        return [
+        $user = $this->user();
+        $isAdmin = $user->hasRole('admin'); 
+        $hasKtp = $user->profile && $user->profile->ktp_path;
+
+        // 1. ATURAN DASAR (Wajib untuk Admin & Tenant)
+        $rules = [
             'full_name' => 'required|string|max:100',
-            // NIK harus 16 digit dan unik (kecuali milik user sendiri)
-            'nik' => [
-                'required',
-                'digits:16',
-                Rule::unique('user_profiles', 'nik')->ignore($this->user()->id, 'user_id')
-            ],
             'phone_number' => 'required|string|max:15',
+            'nickname' => 'nullable|string|max:50',
             'gender' => 'required|in:male,female',
             'birth_date' => 'required|date|before:today',
-            'address' => 'required|string|max:500',
-            'occupation' => 'required|string|max:100',
+        ];
 
-            // Kontak Darurat (Wajib)
-            'emergency_contact_name' => 'required|string|max:100',
-            'emergency_contact_phone' => 'required|string|max:15',
+        // 2. ATURAN KHUSUS (Berbeda antara Admin dan Tenant)
+        if ($isAdmin) {
+            // Jika ADMIN: Semua dokumen dan kontak darurat TIDAK WAJIB (nullable)
+            $rules['nik'] = ['nullable', 'digits:16', Rule::unique('user_profiles', 'nik')->ignore($user->id, 'user_id')];
+            $rules['address'] = 'nullable|string|max:500';
+            $rules['occupation'] = 'nullable|string|max:100';
+            $rules['emergency_contact_name'] = 'nullable|string|max:100';
+            $rules['emergency_contact_phone'] = 'nullable|string|max:15';
+            $rules['ktp_image'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
+        } else {
+            // Jika TENANT: Dokumen dan kontak darurat WAJIB (required)
+            $rules['nik'] = ['required', 'digits:16', Rule::unique('user_profiles', 'nik')->ignore($user->id, 'user_id')];
+            $rules['address'] = 'required|string|max:500';
+            $rules['occupation'] = 'required|string|max:100';
+            $rules['emergency_contact_name'] = 'required|string|max:100';
+            $rules['emergency_contact_phone'] = 'required|string|max:15';
 
-            // Upload KTP (Hanya gambar, max 2MB)
-            'ktp_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            // KTP Wajib jika belum pernah upload
+            $rules['ktp_image'] = $hasKtp 
+                ? 'nullable|image|mimes:jpeg,png,jpg|max:2048' 
+                : 'required|image|mimes:jpeg,png,jpg|max:2048';
+        }
+
+        return $rules;
+    }
+
+    public function messages(): array {
+        return [
+            'ktp_image.required' => 'Foto KTP wajib diunggah untuk keperluan verifikasi.',
+            'nik.unique' => 'NIK ini sudah terdaftar pada akun lain.'
         ];
     }
 }

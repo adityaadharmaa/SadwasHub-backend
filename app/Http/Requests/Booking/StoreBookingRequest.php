@@ -24,8 +24,10 @@ class StoreBookingRequest extends FormRequest
         return [
             'room_id' => 'required|uuid|exists:rooms,id',
             'check_in_date' => 'required|date|after_or_equal:today',
-            'duration_months' => 'required|integer|min:1',
+            'rent_type' => 'required|string|in:daily,weekly,monthly', // <--- BARU
+            'duration' => 'required|integer|min:1', // <--- UBAH DARI duration_months
             'promo_code' => 'nullable|string|exists:promos,code',
+            'notes' => 'nullable|string|max:1000'
         ];
     }
 
@@ -35,8 +37,9 @@ class StoreBookingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'check_out_date.after' => 'Tanggal keluar harus setelah tanggal masuk.',
+            'check_in_date.after_or_equal' => 'Tanggal check-in minimal adalah hari ini.',
             'room_id.exists' => 'Kamar yang dipilih tidak valid.',
+            'rent_type.in' => 'Tipe sewa tidak valid.',
         ];
     }
 }

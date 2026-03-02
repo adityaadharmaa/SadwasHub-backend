@@ -15,15 +15,16 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            // Opsional: Hanya muncul jika relasi user di-load (Biasanya untuk Admin)
+           'id' => $this->id,
             'user' => new UserResource($this->whenLoaded('user')),
             'room' => new RoomResource($this->whenLoaded('room')),
+            'rent_type' => $this->rent_type, // <--- TAMBAHKAN INI
             'check_in_date' => $this->check_in_date,
             'check_out_date' => $this->check_out_date,
             'total_amount' => (float) $this->total_amount,
             'discount_amount' => (float) $this->discount_amount,
-            'status' => $this->status, // pending, confirmed, cancelled, completed
+            'status' => $this->status, 
+            'notes' => $this->notes, // <--- TAMBAHKAN INI
             'payments' => new PaymentResource($this->whenLoaded('payments')),
             'created_at' => $this->created_at->toIso8601String(),
         ];

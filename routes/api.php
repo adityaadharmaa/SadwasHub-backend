@@ -108,11 +108,12 @@ Route::prefix('v1')->group(function () {
                 return response()->json(['message' => 'Welcome to the tenant dashboard!']);
             });
 
+            Route::get('/rooms', [RoomController::class, 'index']);
+            Route::get('/rooms/{id}', [RoomController::class, 'show']);
+
             Route::middleware(['verified'])->group(function () {
-                Route::get('/exclusive-content', function () {
-                    return response()->json(['message' => 'This is exclusive content for verified tenants!']);
-                });
                 Route::post('/bookings', [BookingController::class, 'store']);
+                Route::get('/bookings/{id}', [BookingController::class, 'show']);
                 Route::post('/bookings/{id}/extend', [BookingController::class, 'extend']);
                 Route::get('/bookings', [BookingController::class, 'myBookings']);
 

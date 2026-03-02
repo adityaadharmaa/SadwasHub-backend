@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class UserProfile extends Model
 {
@@ -13,6 +14,7 @@ class UserProfile extends Model
     protected $fillable = [
         'user_id',
         'full_name',
+        'nickname',
         'phone_number',
         'nik',
         'address',
@@ -35,5 +37,10 @@ class UserProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(Attachment::class, 'attachable');
     }
 }

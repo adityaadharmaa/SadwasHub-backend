@@ -22,12 +22,15 @@ class StoreRoomTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:50|unique:room_types,name',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price_per_month' => 'required|numeric|min:0',
-
-            'facilities' => 'array',
-            'facilities.*' => 'exists:facilities,id',
+            // TAMBAHKAN 2 BARIS INI:
+            'price_per_day' => 'nullable|numeric|min:0',
+            'price_per_week' => 'nullable|numeric|min:0',
+            // ====================
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'exists:facilities,id'
         ];
     }
 }

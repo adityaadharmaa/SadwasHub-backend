@@ -27,7 +27,7 @@ class RoleService extends BaseService
 
     public function createRole(array $data)
     {
-        $this->atomic(function () use ($data) {
+        return $this->atomic(function () use ($data) {
             $roleData = [
                 'name' => $data['name'],
                 'guard_name' => 'api'

@@ -22,12 +22,15 @@ class UpdateRoomTypesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'sometimes|string|max:50',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'price_per_month' => 'sometimes|numeric|min:0',
-
-            'facilities' => 'array',
-            'facilities.*' => 'exists:facilities,id',
+            'price_per_month' => 'sometimes|required|numeric|min:0',
+            // TAMBAHKAN 2 BARIS INI:
+            'price_per_day' => 'nullable|numeric|min:0',
+            'price_per_week' => 'nullable|numeric|min:0',
+            // ====================
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'exists:facilities,id'
         ];
     }
 }

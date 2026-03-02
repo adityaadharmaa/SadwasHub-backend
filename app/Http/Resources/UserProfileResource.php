@@ -15,13 +15,17 @@ class UserProfileResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $ktpAttachment = $this->whenLoaded('attachments')
+        ? $this->attachments->where('file_type', 'ktp')->first()
+        : null;
         return [
             'id' => $this->id,
             'full_name' => $this->full_name,
+            'nickname' => $this->nickname,
             'phone_number' => $this->phone_number,
             'nik' => $this->nik,
             'address' => $this->address,
-            'ktp_url' => $this->ktp_path ? asset('storage/' . $this->ktp_path) : null,
+            'ktp_url' => $ktpAttachment ? $ktpAttachment->file_path : null,
             'is_verified' => $this->is_verified,
             'admin_note' => $this->admin_note,
             

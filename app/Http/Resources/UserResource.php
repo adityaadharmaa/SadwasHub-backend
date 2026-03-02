@@ -19,6 +19,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'email' => $this->email,
             'roles' => $this->getRoleNames()->first(),
+            'email_verified_at' => $this->email_verified_at,
 
             'verification' => [
                 'is_verified' => $profile ? (bool) $profile->is_verified : false,

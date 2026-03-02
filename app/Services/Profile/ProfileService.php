@@ -19,36 +19,41 @@ class ProfileService extends BaseService
     public function updateProfile($user, array $data)
     {
         return $this->atomic(function () use ($user, $data) {
-            if (isset($data['ktp_image'])) {
-
-                $oldKtpPath = $user->profile?->ktp_path;
-
-                if ($oldKtpPath && Storage::disk('local')->exists($oldKtpPath)) {
-                    if (!filter_var($oldKtpPath, FILTER_VALIDATE_URL)) {
-                        Storage::disk('local')->delete($oldKtpPath);
-                    }
-                }
-
-                $file = $data['ktp_image'];
-                $timestamp = date('His');
-                $fileName = "ktp-{$timestamp}-{$user->id}.jpg";
-
-                $image = Image::read($file);
-                $image->scale(width: 800);
-                $encoded = $image->toJpeg(70);
-
-                $path = "ktp_images/{$fileName}";
-                Storage::disk('local')->put($path, (string) $encoded);
-
-                $data['ktp_path'] = $path;
-            }
+            $ktpFile = $data['ktp_image'] ?? null;
+            unset($data['ktp_image']);
 
             $profile = $this->profileRepo->updateOrCreate(
                 ['user_id' => $user->id],
                 $data
             );
 
-            $user->load('profile');
+            if($ktpFile){
+                $oldKtp = $profile->attachments()->where('file_type', 'ktp')->first();
+
+                if($oldKtp){
+                    if(Storage::disk('local')->exists($oldKtp->file_path)){
+                        Storage::disk('local')->delete($oldKtp->file_path);
+                    }
+                    $oldKtp->delete();
+                }
+
+                $timestamp = date('His');
+                $fileName = "ktp-{$timestamp}-{$user->id}.jpg";
+                $path = "ktp_images/{$fileName}";
+
+                $image = Image::read($ktpFile);
+                $image->scale(width: 800);
+                $encoded = $image->toJpeg(70);
+
+                Storage::disk('local')->put($path, (string) $encoded);
+
+                $profile->attachments()->create([
+                    'file_path' => $path,
+                    'file_type' => 'ktp'
+                ]);
+            }
+
+            $user->load(['profile.attachments']);
 
             return $user;
         });

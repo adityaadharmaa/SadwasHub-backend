@@ -16,12 +16,16 @@ class RoomTypeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+           'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
             'slug' => $this->slug ?? Str::slug($this->name),
+            
+            // Tambahkan ketiga tipe harga
+            'price_per_day' => (float) $this->price_per_day,
+            'price_per_week' => (float) $this->price_per_week,
             'price_per_month' => (float) $this->price_per_month,
-            'price_formatted' => 'Rp ' . number_format($this->price_per_month, 0, ',', '.'),
+            
             'facilities' => FacilityResource::collection($this->whenLoaded('facilities')),
             'created_at' => $this->created_at->toIso8601String(),
         ];
