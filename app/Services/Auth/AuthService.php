@@ -51,6 +51,8 @@ class AuthService extends BaseService
 
             event(new Registered($user));
 
+            $user->sendEmailVerificationNotification();
+
             $expiration = now()->addHours(8);
 
             $token = $user->createToken('auth_token', ['*'] ,$expiration)->plainTextToken;

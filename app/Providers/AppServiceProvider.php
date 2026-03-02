@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 1. LETAKKAN INI PALING ATAS
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
+
         VerifyEmail::createUrlUsing(function (object $notifiable) {
             // Link ini akan mengarah ke React (misal: localhost:3000/verify-email)
             $frontendUrl = config('app.frontend_url') . '/verify-email';
