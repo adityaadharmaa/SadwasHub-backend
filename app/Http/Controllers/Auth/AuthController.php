@@ -115,12 +115,12 @@ class AuthController extends Controller
 
             // Arahkan kembali ke React (port 5173) ke halaman khusus penangkap token
             // Anda bisa menggunakan env('FRONTEND_URL', 'http://localhost:5173') jika mau lebih dinamis
-            $frontendUrl = 'http://localhost:5173';
+            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
 
             return redirect()->to($frontendUrl . '/auth/callback?token=' . $token);
         } catch (\Exception $e) {
             // Jika batal/gagal, kembalikan ke halaman login React dengan pesan error
-            $frontendUrl = 'http://localhost:5173';
+            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
             return redirect()->to($frontendUrl . '/login?error=' . urlencode($e->getMessage()));
         }
     }
