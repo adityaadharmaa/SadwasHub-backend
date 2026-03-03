@@ -22,7 +22,8 @@ class ExtendBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'duration_months' => ['required', 'integer', 'min:1', 'max:12']
+            'rent_type' => ['required', 'in:daily,weekly,monthly'],
+            'duration' => ['required', 'integer', 'min:1']
         ];
     }
 }

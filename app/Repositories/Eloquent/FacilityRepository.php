@@ -25,4 +25,10 @@ class FacilityRepository extends BaseRepository implements FacilityRepositoryInt
 
         return $query->orderBy('name', 'asc')->paginate($perPage);
     }
+
+    public function getAllWithoutPagination()
+    {
+        // Gunakan $this->model agar konsisten dengan arsitektur Repository Anda
+        return $this->model->orderBy('name', 'asc')->get();
+    }
 }

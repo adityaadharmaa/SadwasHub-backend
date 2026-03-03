@@ -5,6 +5,7 @@ namespace App\Services\Room;
 use App\Repositories\Interfaces\FacilityRepositoryInterface;
 use App\Services\BaseService;
 use Illuminate\Validation\ValidationException;
+use App\Models\Facilitie;
 
 class FacilityService extends BaseService
 {
@@ -17,6 +18,12 @@ class FacilityService extends BaseService
     public function getAllFacilities(?string $search = null, int $perPage = 10)
     {
         return $this->facilityRepo->getAll($search, $perPage);
+    }
+
+   public function getPublicFacilities()
+    {
+       // Panggil fungsi dari repository yang baru saja kita buat
+       return $this->facilityRepo->getAllWithoutPagination(); 
     }
 
     public function getFacilityById($id)

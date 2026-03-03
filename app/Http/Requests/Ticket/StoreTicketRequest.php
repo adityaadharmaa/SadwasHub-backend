@@ -26,7 +26,19 @@ class StoreTicketRequest extends BaseRequest
             'title' => ['required', 'string', 'max:100'],
             'description' => ['required', 'string'],
             'priority' => ['required', 'in:low,medium,high,urgent'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'photo'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+        ];
+    }
+
+     public function messages(): array
+    {
+        return [
+            'title.required'       => 'Judul masalah wajib diisi.',
+            'description.required' => 'Deskripsi masalah wajib diisi.',
+            'priority.in'          => 'Prioritas tidak valid.',
+            'photo.mimes'          => 'Foto harus berformat JPG, PNG, atau WEBP.',
+            'photo.max'            => 'Ukuran foto maksimal 5MB.',
+            'photo.file'           => 'Upload yang dikirim harus berupa file.',
         ];
     }
 }

@@ -17,6 +17,9 @@ class BookingService extends BaseService
     protected $paymentRepo;
     protected $xenditService;
 
+    // Biaya Admin Flat
+    protected $adminFee = 5000;
+
     public function __construct(
         BookingRepositoryInterface $bookingRepo,
         PaymentRepositoryInterface $paymentRepo,
@@ -39,13 +42,11 @@ class BookingService extends BaseService
 
     public function createBooking($user, array $data)
     {
-        // 1. Melakukan validasi ketersediaan kamar
         $room = Room::with('type')->find($data['room_id']);
         if ($room->status !== 'available') {
             throw ValidationException::withMessages(['room_id' => 'Mohon maaf, kamar yang Anda pilih sedang tidak tersedia.']);
         }
 
-        // 2. Menghitung Tanggal dan Harga Subtotal secara Dinamis (Hybrid)
         $duration = $data['duration'];
         $rentType = $data['rent_type'];
         
@@ -53,7 +54,6 @@ class BookingService extends BaseService
         $checkOutDate = $checkInDate->copy();
         $subTotal = 0;
 
-        // Logika harian, mingguan, bulanan
         if ($rentType === 'daily') {
             $checkOutDate->addDays($duration);
             $subTotal = $room->type->price_per_day * $duration;
@@ -65,7 +65,6 @@ class BookingService extends BaseService
             $subTotal = $room->type->price_per_month * $duration;
         }
 
-        // 3. Menerapkan Promo (jika ada)
         $discountAmount = 0;
         $promoId = null;
         $promo = null;
@@ -92,40 +91,61 @@ class BookingService extends BaseService
             $promoId = $promo->id;
         }
 
-        $totalAmount = $subTotal - $discountAmount;
-        if ($totalAmount < 0) $totalAmount = 0;
+        $priceAfterDiscount = $subTotal - $discountAmount;
+        if ($priceAfterDiscount < 0) {
+            $priceAfterDiscount = 0;
+        }
 
-        return $this->atomic(function () use ($user, $room, $promo, $promoId, $checkInDate, $checkOutDate, $totalAmount, $discountAmount, $duration, $rentType, $data) {
+        $totalAmount = $priceAfterDiscount + $this->adminFee;
+
+        return $this->atomic(function () use ($user, $room, $promo, $promoId, $checkInDate, $checkOutDate, $totalAmount, $discountAmount, $duration, $rentType, $priceAfterDiscount, $data) {
             
-            // A. Simpan data booking
             $booking = $this->bookingRepo->create([
                 'user_id' => $user->id,
                 'room_id' => $room->id,
                 'promo_id' => $promoId,
-                'rent_type' => $rentType, // Simpan tipe sewa ke DB
+                'rent_type' => $rentType, 
                 'check_in_date' => $checkInDate->toDateString(),
                 'check_out_date' => $checkOutDate->toDateString(),
-                'total_amount' => $totalAmount,
+                'total_amount' => $totalAmount, 
                 'discount_amount' => $discountAmount,
-                'notes' => $data['notes'] ?? null, // PERBAIKAN BUG DISINI
+                'notes' => $data['notes'] ?? null, 
                 'status' => 'pending'
             ]);
 
-            // B. Minta Link Pembayaran dari Xendit
-            $externalId = 'SC-' . $booking->id . '-' . time();
-            
-            // Label deskripsi dinamis (Misal: Sewa daily Kamar 01 untuk 3 hari)
+            $shortUuid = strtoupper(substr($booking->id, 0, 6));
+            $externalId = 'INV-SC-' . date('Ymd') . '-' . $shortUuid;
             $timeLabel = $rentType === 'daily' ? 'hari' : ($rentType === 'weekly' ? 'minggu' : 'bulan');
             $description = "Sewa {$rentType} Kamar {$room->room_number} untuk {$duration} {$timeLabel}";
 
+            // --- 1. SIAPKAN RINCIAN ITEM (KAMAR) ---
+            $items = [
+                [
+                    'name' => "Kamar {$room->room_number} ({$duration} {$timeLabel})",
+                    'quantity' => 1,
+                    'price' => $priceAfterDiscount,
+                    'category' => 'Akomodasi'
+                ]
+            ];
+
+            // --- 2. SIAPKAN RINCIAN BIAYA ADMIN ---
+            $fees = [
+                [
+                    'type' => 'Biaya Layanan Aplikasi',
+                    'value' => $this->adminFee
+                ]
+            ];
+
+            // --- 3. KIRIM KE XENDIT BESERTA ITEM & FEE ---
             $xenditResponse = $this->xenditService->createInvoice(
                 $externalId,
                 $totalAmount,
                 $user->email,
-                $description
+                $description,
+                $items, // Kirim payload items
+                $fees   // Kirim payload fees
             );
 
-            // C. Simpan Data Payment
             $this->paymentRepo->create([
                 'booking_id' => $booking->id,
                 'external_id' => $externalId,
@@ -134,7 +154,6 @@ class BookingService extends BaseService
                 'checkout_url' => $xenditResponse['invoice_url']
             ]);
 
-            // D. Kunci kamar
             $room->update(['status' => 'occupied']);
 
             if ($promo && $promo->limit !== null) {
@@ -150,38 +169,80 @@ class BookingService extends BaseService
         $oldBooking = $this->bookingRepo->find($bookingId);
 
         if (!$oldBooking || $oldBooking->user_id !== $user->id || $oldBooking->status !== 'confirmed') {
-            throw ValidationException::withMessages(['booking' => 'Data sewa tidak valid atau tidak bisa di perpanjang.']);
+            throw ValidationException::withMessages(['booking' => 'Data sewa tidak valid atau tidak bisa diperpanjang.']);
         }
 
         $room = Room::with('type')->find($oldBooking->room_id);
-        $duration = $data['duration_months'];
+        
+        $rentType = $data['rent_type'];
+        $duration = $data['duration'];
 
         $checkInDate = Carbon::parse($oldBooking->check_out_date);
-        $checkOutDate = $checkInDate->copy()->addMonths($duration);
+        $checkOutDate = $checkInDate->copy();
+        
+        $subTotal = 0;
+        $timeLabel = '';
 
-        $pricePerMonth = $room->type->price_per_month;
-        $totalAmount = $pricePerMonth * $duration;
+        if ($rentType === 'daily') {
+            $checkOutDate->addDays($duration);
+            $subTotal = $room->type->price_per_day * $duration;
+            $timeLabel = 'hari';
+        } elseif ($rentType === 'weekly') {
+            $checkOutDate->addWeeks($duration);
+            $subTotal = $room->type->price_per_week * $duration;
+            $timeLabel = 'minggu';
+        } elseif ($rentType === 'monthly') {
+            $checkOutDate->addMonths($duration);
+            $subTotal = $room->type->price_per_month * $duration;
+            $timeLabel = 'bulan';
+        }
 
-        return $this->atomic(function () use ($user, $room, $checkInDate, $checkOutDate, $totalAmount, $duration) {
+        $totalAmount = $subTotal + $this->adminFee;
+
+        return $this->atomic(function () use ($user, $room, $checkInDate, $checkOutDate, $totalAmount, $subTotal, $duration, $rentType, $timeLabel) {
+            
             $newBooking = $this->bookingRepo->create([
                 'user_id' => $user->id,
                 'room_id' => $room->id,
-                'promo_id' => null,
+                'promo_id' => null, 
+                'rent_type' => $rentType, 
                 'check_in_date' => $checkInDate->toDateString(),
                 'check_out_date' => $checkOutDate->toDateString(),
-                'total_amount' => $totalAmount,
+                'total_amount' => $totalAmount, 
                 'discount_amount' => 0,
                 'status' => 'pending',
             ]);
 
-            $externalId = 'SC-EXT-' . $newBooking->id . '-' . time();
-            $description = "Perpanjang Sewa Kamar {$room->room_number} untuk {$duration} bulan";
+            $shortUuid = strtoupper(substr($newBooking->id, 0, 6)); 
+            $externalId = 'INV-EXT-' . date('Ymd') . '-' . $shortUuid;
+            $description = "Perpanjangan {$rentType} Kamar {$room->room_number} untuk {$duration} {$timeLabel}";
 
+            // --- 1. SIAPKAN RINCIAN ITEM PERPANJANGAN ---
+            $items = [
+                [
+                    'name' => "Perpanjangan Kamar {$room->room_number} ({$duration} {$timeLabel})",
+                    'quantity' => 1,
+                    'price' => $subTotal,
+                    'category' => 'Akomodasi'
+                ]
+            ];
+
+            // --- 2. SIAPKAN RINCIAN BIAYA ADMIN ---
+            $fees = [
+                [
+                    'type' => 'Biaya Layanan Aplikasi',
+                    'value' => $this->adminFee
+                ]
+            ];
+
+            // --- 3. KIRIM KE XENDIT ---
             $xenditResponse = $this->xenditService->createInvoice(
                 $externalId,
                 $totalAmount,
                 $user->email,
-                $description
+                $description,
+                $items, // Kirim payload items
+                $fees   // Kirim payload fees
             );
 
             $this->paymentRepo->create([

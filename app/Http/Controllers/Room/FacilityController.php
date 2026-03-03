@@ -31,6 +31,18 @@ class FacilityController extends Controller
         ]);
     }
 
+    public function publicIndex()
+    {
+        // Memanggil service untuk mendapatkan semua fasilitas
+        $facilities = $this->facilityService->getPublicFacilities();
+
+        // Mengembalikan resource tanpa pagination (langsung data array)
+        return FacilityResource::collection($facilities)->additional([
+            'message' => 'Daftar fasilitas publik berhasil diambil.',
+            'status'  => 'success'
+        ]);
+    }
+
     public function store(StoreFacilityRequest $request)
     {
         $facility = $this->facilityService->createFacility($request->validated());

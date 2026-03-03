@@ -138,6 +138,10 @@ Route::prefix('v1')->group(function () {
     
     // ------ End General Profile Space ------
 
+    // Public Space
+    Route::get('/public/facilities', [FacilityController::class, 'publicIndex']);
+    // End Public Space
+
     // ------ Webhook SPACE ------
     Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle']);
     // ------ End Webhook Space ------
